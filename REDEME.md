@@ -11,7 +11,7 @@ Após a criação da rede virtual, iremos copiar o conteúdo da pasta do git con
 *git clone https://github.com/Italo-Roberto/zabbix-docker.git*
 
 Com os arquivos na máquina local, iremos executar o script
- * ./zabbix.docker-postegre.sh *
+ *./zabbix.docker-postegre.sh*
 
 Com isso teremos o zabbix server com todas suas funcionalidades disponível para acesso atráves do ip de loopback
 *docker network create rede-interna --subnet 127.0.0.1/zabbix*
