@@ -22,6 +22,18 @@ sudo docker run --name zabbix-server-pgsql -it \
       -e POSTGRES_PASSWORD="zabbix_pwd" \
       -e POSTGRES_DB="zabbix" \
       -e ZBX_ENABLE_SNMP_TRAPS="true" \
+      -e DB_SERVER_HOST="postgres-server" \
+      -e POSTGRES_USER="zabbix" \
+      -e POSTGRES_PASSWORD="zabbix_pwd" \
+      -e POSTGRES_DB="zabbix" \
+      -e ZBX_ENABLE_SNMP_TRAPS="true" \
+      -e ZBX_STARTPOLLERS="20" \
+      -e ZBX_STARTPINGERS="20" \
+      -e ZBX_CACHESIZE="64M" \
+      -e ZBX_HISTORYCACHESIZE="32M" \
+      -e ZBX_HISTORYINDEXCACHESIZE="16M" \
+      -e ZBX_TRENDCACHESIZE="16M" \
+      -e ZBX_VALUECACHESIZE="32M" \
       --network=rede-interna \
       -p 10051:10051 \
       --volumes-from zabbix-snmptraps \
