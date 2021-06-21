@@ -15,7 +15,7 @@ Com os arquivos na máquina local, iremos executar o script
 
 Com isso teremos o zabbix server com todas suas funcionalidades disponível para acesso atráves do ip de loopback
 *docker network create rede-interna --subnet 127.0.0.1/zabbix*
+
 Com as credenciais:
 Usuário: Admin
 senha: zabbix
-
