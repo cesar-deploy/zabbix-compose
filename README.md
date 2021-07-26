@@ -12,7 +12,7 @@ Pré requesitos:
 </ul>
 
 Antes de realizar a execução do script é necessário criar um rede em modo bridge, para suportar os containers do zabbix: <br>
-*docker network create rede-interna --subnet 172.16.0.1/29*
+*docker network create rede-interna --subnet 172.16.0.0/29*
 
 Após o dowload do script, devemos executa-lo com permissão de root (admin, no caso do windows): <br>
 *sudo ./zabbix.docker-postegre.sh*
