@@ -1,0 +1,112 @@
+version: '3.1'
+
+networks:
+  zabbix:
+    driver: bridge
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    networks:
+      - zabbix
+    
+    volumes:
+      - ./zabbix/pqsql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=zabbix
+      - POSTGRES_DB=zabbix
+      - POSTGRES_PASSWORD=t53420424
+
+  zabbix-server:
+    container_name: zabbix-server
+    image: zabbix/zabbix-server-pgsql
+    networks:
+      - zabbix
+    depends_on:
+      - postgres
+    restart: always
+    ports:
+      - 10051:10051
+    volumes:
+      - ./zabbix/zabbix-server:/usr/lib/zabbix/alertscripts
+      - ./zabbix/zabbix-server:/usr/lib/zabbix/externalscripts
+      - ./zabbix/zabbix-server:/var/lib/zabbix/modules
+      - ./zabbix/zabbix-server:/var/lib/zabbix/enc
+      - ./zabbix/zabbix-server:/var/lib/zabbix/ssh_keys
+      - ./zabbix/zabbix-server:/var/lib/zabbix/ssl/certs
+      - ./zabbix/zabbix-server:/var/lib/zabbix/ssl/keys
+      - ./zabbix/zabbix-server:/var/lib/zabbix/ssl/ssl_ca
+      - ./zabbix/zabbix-server:/var/lib/zabbix/snmptraps
+      - ./zabbix/zabbix-server:/var/lib/zabbix/mibs
+      - ./zabbix/zabbix-server:/var/lib/zabbix/export
+    environment:
+      - DB_SERVER_HOST=postgres
+      - POSTGRES_DB=zabbix
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=t53420424
+    depends_on:
+      - postgres
+
+  zabbix-frontend:
+    container_name: zabbix-frontend
+    image: zabbix/zabbix-web-nginx-pgsql
+    networks:
+      - zabbix
+    depends_on:
+      - postgres
+    restart: always
+    ports:
+      - 80:8080
+      - 443:8443
+    environment:
+      - DB_SERVER_HOST=postgres
+      - POSTGRES_DB=zabbix
+      - POSTGRES_USER=zabbix
+      - POSTGRES_PASSWORD=t53420424
+      - PHP_TZ=America/Sao_Paulo
+      - ZBX_SERVER_HOST=192.168.1.101
+    user: root
+    privileged: true
+    depends_on:
+      - postgres
+    volumes:
+      - ./zabbix/zabbix-frontend:/etc/ssl/nginx
+      - ./zabbix/zabbix-frontend:/etc/zabbix/web/certs
+   
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    networks:
+      - zabbix
+    restart: always
+    ports:
+      - 3000:3000
+    environment: 
+      - GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app
+    user: root
+    privileged: true
+    depends_on:
+      - postgres
+      - zabbix-server
+  zabbix-agent:
+    container_name: zabbix-agent
+    image: zabbix/zabbix-agent2:alpine-5.0.1
+    user: root
+    networks:
+      - zabbix
+    depends_on:
+      - zabbix-server
+    restart: always
+    privileged: true
+    volumes:
+      - ./zabbix/zabbix-agent:/var/run
+      - ./zabbix/zabbix-agent:/var/lib/zabbix/modules
+      - ./zabbix/zabbix-agent:/var/lib/zabbix/enc
+      - ./zabbix/zabbix-agent:/etc/zabbix/zabbix_agentd.d
+    ports:
+      - 10050:10050
+    environment:
+      - ZBX_HOSTNAME=Zabbix server
+      - ZBX_SERVER_HOST=172.19.0.1
+    
