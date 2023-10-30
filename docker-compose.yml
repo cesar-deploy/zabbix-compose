@@ -10,9 +10,8 @@ services:
     image: postgres
     networks:
       - zabbix
-    
     volumes:
-      - ./zabbix/pqsql:/var/lib/postgresql/data
+      - ./zabbix/postgresql:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=zabbix
       - POSTGRES_DB=zabbix
@@ -29,24 +28,22 @@ services:
     ports:
       - 10051:10051
     volumes:
-      - ./zabbix/zabbix-server:/usr/lib/zabbix/alertscripts
-      - ./zabbix/zabbix-server:/usr/lib/zabbix/externalscripts
-      - ./zabbix/zabbix-server:/var/lib/zabbix/modules
-      - ./zabbix/zabbix-server:/var/lib/zabbix/enc
-      - ./zabbix/zabbix-server:/var/lib/zabbix/ssh_keys
-      - ./zabbix/zabbix-server:/var/lib/zabbix/ssl/certs
-      - ./zabbix/zabbix-server:/var/lib/zabbix/ssl/keys
-      - ./zabbix/zabbix-server:/var/lib/zabbix/ssl/ssl_ca
-      - ./zabbix/zabbix-server:/var/lib/zabbix/snmptraps
-      - ./zabbix/zabbix-server:/var/lib/zabbix/mibs
-      - ./zabbix/zabbix-server:/var/lib/zabbix/export
+      - ./zabbix/zabbix-server/alertscripts:/usr/lib/zabbix/alertscripts
+      - ./zabbix/zabbix-server/externalscripts:/usr/lib/zabbix/externalscripts
+      - ./zabbix/zabbix-server/modules:/var/lib/zabbix/modules
+      - ./zabbix/zabbix-server/enc:/var/lib/zabbix/enc
+      - ./zabbix/zabbix-server/ssh_keys:/var/lib/zabbix/ssh_keys
+      - ./zabbix/zabbix-server/ssl_certs:/var/lib/zabbix/ssl/certs
+      - ./zabbix/zabbix-server/ssl_keys:/var/lib/zabbix/ssl/keys
+      - ./zabbix/zabbix-server/ssl_ssl_ca:/var/lib/zabbix/ssl/ssl_ca
+      - ./zabbix/zabbix-server/snmptraps:/var/lib/zabbix/snmptraps
+      - ./zabbix/zabbix-server/mibs:/var/lib/zabbix/mibs
+      - ./zabbix/zabbix-server/export:/var/lib/zabbix/export
     environment:
       - DB_SERVER_HOST=postgres
       - POSTGRES_DB=zabbix
       - POSTGRES_USER=zabbix
       - POSTGRES_PASSWORD=zabbix
-    depends_on:
-      - postgres
 
   zabbix-frontend:
     container_name: zabbix-frontend
@@ -65,15 +62,13 @@ services:
       - POSTGRES_USER=zabbix
       - POSTGRES_PASSWORD=zabbix
       - PHP_TZ=America/Sao_Paulo
-      - ZBX_SERVER_HOST=192.168.1.101
+      - ZBX_SERVER_HOST=zabbix-server
     user: root
     privileged: true
-    depends_on:
-      - postgres
     volumes:
-      - ./zabbix/zabbix-frontend:/etc/ssl/nginx
-      - ./zabbix/zabbix-frontend:/etc/zabbix/web/certs
-   
+      - ./zabbix/zabbix-frontend/ssl_nginx:/etc/ssl/nginx
+      - ./zabbix/zabbix-frontend/ssl_zabbix:/etc/zabbix/web/certs
+
   grafana:
     container_name: grafana
     image: grafana/grafana
@@ -82,13 +77,14 @@ services:
     restart: always
     ports:
       - 3000:3000
-    environment: 
+    environment:
       - GF_INSTALL_PLUGINS=alexanderzobnin-zabbix-app
     user: root
     privileged: true
     depends_on:
       - postgres
       - zabbix-server
+
   zabbix-agent:
     container_name: zabbix-agent
     image: zabbix/zabbix-agent2:alpine-5.0.1
@@ -100,13 +96,13 @@ services:
     restart: always
     privileged: true
     volumes:
-      - ./zabbix/zabbix-agent:/var/run
-      - ./zabbix/zabbix-agent:/var/lib/zabbix/modules
-      - ./zabbix/zabbix-agent:/var/lib/zabbix/enc
-      - ./zabbix/zabbix-agent:/etc/zabbix/zabbix_agentd.d
+      - ./zabbix/zabbix-agent/run:/var/run
+      - ./zabbix/zabbix-agent/modules:/var/lib/zabbix/modules
+      - ./zabbix/zabbix-agent/enc:/var/lib/zabbix/enc
+      - ./zabbix/zabbix-agent/zabbix_agentd.d:/etc/zabbix/zabbix_agentd.d
     ports:
       - 10050:10050
     environment:
       - ZBX_HOSTNAME=Zabbix server
-      - ZBX_SERVER_HOST=172.19.0.1
-    
+      - ZBX_SERVER_HOST=zabbix-server
+
